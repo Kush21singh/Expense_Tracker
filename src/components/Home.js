@@ -14,7 +14,7 @@ function HomeScreen(){
     }
     return(
         <div>
-            <h1>Home</h1>
+            <h1>Welcome To Expense Tracker</h1>
             <button onClick={handleClick}>SignOut</button>
         </div>
     )
