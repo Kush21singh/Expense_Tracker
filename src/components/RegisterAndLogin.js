@@ -1,73 +1,112 @@
 import React, { useState } from "react";
-import { database } from "./FirebaseConfig";
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-} from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth"; // Import the necessary Firebase authentication functions
+import { initializeApp } from "firebase/app"; // Import the initializeApp function
+import { getAuth } from "firebase/auth"; // Import the getAuth function
 import { useNavigate } from "react-router-dom";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDvev9F-NNqmr4SdRG_VcvQEjlLKAyaCWg",
+  authDomain: "expensetracker-e1497.firebaseapp.com",
+  projectId: "expensetracker-e1497",
+  storageBucket: "expensetracker-e1497.appspot.com",
+  messagingSenderId: "405268828223",
+  appId: "1:405268828223:web:f949516fd4d35ac74ca88a"
+};
+
+const app = initializeApp(firebaseConfig); // Initialize Firebase
+
+const auth = getAuth(app);
 
 function RegisterAndLogin() {
   const [login, setLogin] = useState(false);
-
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const history = useNavigate();
 
-  const handleSubmit = (e, type) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    const email = e.target.email.value;
-    const password = e.target.password.value;
-    if (type == "signup") {
-      createUserWithEmailAndPassword(database, email, password)
-        .then((data) => {
-          console.log(data, "authData");
+    if (login) {
+      // Sign In logic
+      signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          console.log("Signed in as:", user.email);
           history("/home");
         })
-        .catch((err) => {
-          alert(err.code);
-          setLogin(true);
+        .catch((error) => {
+          alert(error.code);
         });
     } else {
-      signInWithEmailAndPassword(database, email, password)
-        .then((data) => {
-          console.log(data, "authData");
+      // Sign Up logic
+      if (password !== confirmPassword) {
+        alert("Passwords do not match.");
+        return;
+      }
+      createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          console.log("Registered as:", user.email);
           history("/home");
         })
-        .catch((err) => {
-          alert(err.code);
+        .catch((error) => {
+          alert(error.code);
         });
     }
   };
 
-  const handleReset = ()=>{
-    history("/reset");
-  }
+  const handleToggle = () => {
+    setLogin(!login);
+  };
+
   return (
     <div className="App">
-      {/* Registration and login Screen */}
-      <div className="row">
-        <div
-          className={login == false ? "activeColor" : "pointer"}
-          onClick={() => setLogin(false)}
-        >
-          SignUp
-        </div>
-        <div
-          className={login == true ? "activeColor" : "pointer"}
-          onClick={() => setLogin(true)}
-        >
-          SignIn
-        </div>
-      </div>
-      <h1>{login ? "SignIn" : "SignUp"}</h1>
-      <form onSubmit={(e) => handleSubmit(e, login ? "signin" : "signup")}>
-        <input name="email" placeholder="Email" />
+      <h1>{login ? "Sign In" : "Sign Up"}</h1>
+      <form onSubmit={handleSubmit}>
+        <label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+          />
+        </label>
         <br />
-        <input name="password" type="text" placeholder="Password" />
+        <label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+          />
+        </label>
         <br />
-        <p onClick={handleReset}>Forgot Password?</p>
-        <br />
-        <button>{login ? "SignIn" : "SignUp"}</button>
+        {login ? null : (
+          <div>
+            <label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm Password"
+              />
+            </label>
+            <br />
+          </div>
+        )}
+        <button>{login ? "Sign In" : "Sign Up"}</button>
       </form>
+      {login && (
+        <button onClick={handleToggle}>Forgot Password</button>
+      )}
+      <p>
+        {login ? "Don't have an account? " : "Already have an account? "}
+        <button onClick={handleToggle}>
+          {login ? "Sign Up" : "Sign In"}
+        </button>
+      </p>
     </div>
   );
 }
+
 export default RegisterAndLogin;

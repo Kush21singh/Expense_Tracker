@@ -1,0 +1,16 @@
+.home-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid black;
+  }
+  
+  .home-container h1,
+  .home-container p {
+    font-family: "Times New Roman", Times, serif;
+    font-style: italic;
+    margin: 0;
+    margin-right: 10px; /* Adjust the margin as needed */
+  }
+  
